@@ -9,6 +9,7 @@ from ezjailremote import fabfile as ezjail
 class JailHost(object):
 
     jailzfs = None
+    ip_addr = None
     install_ports = True
     install_from = 'pkg_add'
 
@@ -18,7 +19,7 @@ class JailHost(object):
         any other entries that don't start with an underscore are treated as jail definitions.
         """
         self.config = config
-        for key, value in config['host'].items():
+        for key, value in config.get('host', dict()).items():
             setattr(self, key, value)
 
         if blueprints is None:

@@ -64,7 +64,7 @@ def main():
     blueprints = __import__(path.splitext(fs_blueprint)[0])
     # inject location of the config file so jails can resolve relative paths
     config['_fs_config'] = path.dirname(path.abspath(fs_config))
-    jailhost = getattr(blueprints, config['host'].get('blueprint',
+    jailhost = getattr(blueprints, config.get('host', dict()).get('blueprint',
         'JailHost'))(blueprints, config)
 
     # 'point' fabric to the jail host
