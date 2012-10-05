@@ -35,6 +35,6 @@ setup(name='ezjaildeploy',
       entry_points="""
       # -*- Entry points: -*-
         [console_scripts]
-        ezjail-deploy=ezjailrdeploy.commandline:main
+        ezjail-deploy=ezjaildeploy.commandline:main
       """,
       )

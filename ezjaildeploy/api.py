@@ -58,8 +58,7 @@ class JailHost(object):
 
 
 class BaseJail(object):
-    """
-        Represents a to-be-created or already existing jail instance.
+    """Represents a to-be-created or already existing jail instance.
 
         It provides three methods: create, configure and update which it expects to be run
         from a fabfile with a connection to the jail host.
