@@ -10,7 +10,7 @@ Replace the value for ``ip_addr`` with that of your jail host.
 Bootstrapping
 =============
 
-Bootstrapping is an optional convenience command to setup the jail host to meet the requirements to install and run ezjail-remote.
+Bootstrapping is an optional convenience command to setup the jail host to meet the requirements to install and run ezjail-deploy.
 
 The default bootstrap does the following:
 
@@ -48,7 +48,7 @@ Now you're ready to deploy the first example. First, exit the ssh shell - from n
 
     $ exit
 
-For this example we will install a simple forwardinf and caching nameserver using the excellent ``unbound`` daemon. To do so simply run::
+For this example we will install a simple forwarding and caching nameserver using the excellent ``unbound`` daemon. To do so simply run::
 
     # ezjail-deploy init unbound
 
