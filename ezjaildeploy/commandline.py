@@ -1,5 +1,5 @@
 """Usage:
-    ezjail-deploy [options] (bootstrap|install)
+    ezjail-deploy [options] (bootstrap|install|list-blueprints)
     ezjail-deploy [options] (init|prepare|configure|update|destroy) [JAIL]...
 
 Deploy a jail host and/or jail(s).
@@ -8,10 +8,13 @@ Options:
     -b , --blueprints FILE   path to the blueprint python file [default: ./blueprints.py]
     -c, --config FILE        path to config file [default: ./jails.conf]
     -h, --help               show this message
+    -v, --verbose            show more output
 
 
 Commands:
-    boostrap: prepare a remote jail host via SSH.
+    boostrap: prepare a remote jail host via SSH and install ezjail
+    install: install ezjail (without bootstrapping)
+    list-blueprints: display a list of all available blueprints
     init: call the `create`, `prepare` and `update`` methods of all given jails.
         if no jail is specified, *all* jails are targetted.
 
@@ -76,6 +79,14 @@ def main():
     if arguments['install'] or arguments['bootstrap']:
         jailhost.install()
         exit()
+
+    if arguments['list-blueprints']:
+        for name, blueprint in jailhost.available_blueprints.items():
+            if arguments['--verbose']:
+                description = blueprint.__doc__
+            else:
+                description = blueprint.__doc__.split('\n')[0]
+            print '%s: %s' % (name, description)
 
     # validate the jail name(s)
     jails = arguments['JAIL']
