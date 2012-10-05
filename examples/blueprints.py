@@ -38,7 +38,7 @@ class CryptoJailHost(JailHost):
 
 class UnboundJail(BaseJail):
 
-    """ Configures a simply forwarding, caching nameserver.
+    """ Configures a simple forwarding, caching nameserver.
     """
 
     ports_to_install = ['dns/unbound']
