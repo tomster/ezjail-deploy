@@ -52,6 +52,7 @@ class JailHost(object):
     def bootstrap(self):
         # run ezjailremote's basic bootstrap
         ezjail.bootstrap(primary_ip=self.ip_addr)
+        fab.sudo('pkg_add -r rsync')
 
     def install(self):
         ezjail.install(source=self.install_from, jailzfs=self.jailzfs, p=self.install_ports)
