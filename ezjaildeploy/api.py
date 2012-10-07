@@ -71,7 +71,7 @@ class BaseJail(object):
     """
 
     name = ""
-    ctype = 'zfs'
+    ctype = None
     sshd = False
     ip_addr = None
     fs_local_root = None
