@@ -42,3 +42,7 @@ class UnboundJail(BaseJail):
     """
 
     ports_to_install = ['dns/unbound']
+
+    @property
+    def access_control(self):
+        return '%s.0/16 allow' % '.'.join(self.ip_addr.split('.')[:3])
