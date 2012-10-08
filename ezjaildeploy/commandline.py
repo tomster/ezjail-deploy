@@ -1,5 +1,5 @@
 """Usage:
-    ezjail-deploy [options] (bootstrap|install|list-blueprints)
+    ezjail-deploy [options] (bootstrap|install|list-blueprints|list-jails)
     ezjail-deploy [options] (init|upload|prepare|configure|update|destroy) [JAIL]...
 
 Deploy a jail host and/or jail(s).
@@ -89,6 +89,11 @@ def main():
             else:
                 description = blueprint.__doc__.split('\n')[0]
             print '%s: %s' % (name, description)
+        exit()
+
+    if arguments['list-jails']:
+        fab.sudo('ezjail-admin list')
+        exit()
 
     # validate the jail name(s)
     jails = arguments['JAIL']
