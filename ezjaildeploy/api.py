@@ -5,6 +5,8 @@ from fabric import api as fab
 from fabric.contrib.project import rsync_project
 from ezjailremote import fabfile as ezjail
 
+from util import render_site_structure
+
 
 class JailHost(object):
 
@@ -113,14 +115,18 @@ class BaseJail(object):
     def create(self):
         ezjail.create(self.name, self.ip_addr, ctype=self.ctype, sshd=self.sshd)
 
-    def prepare(self):
-        # upload site root
+    def upload(self):
         if path.exists(self.fs_local_root):
             fab.sudo('rm -rf /tmp/%s' % self.name)
-            rsync_project('/tmp/%s/' % self.name, self.fs_local_root,
+            fs_rendered = render_site_structure(self.fs_local_root, vars(self))
+            rsync_project('/tmp/%s/' % self.name, '%s/' % fs_rendered,
                 extra_opts='--perms --executability -v --super')
             fab.sudo('rsync -rav /tmp/%s/ /usr/jails/%s/' % (self.name, self.name))
             fab.sudo('rm -rf /tmp/%s' % self.name)
+
+    def prepare(self):
+        # upload site root (it might contain port configuration)
+        self.upload()
         # install ports
         for port in self.ports_to_install:
             self.console('make -C /usr/ports/%s install' % port)

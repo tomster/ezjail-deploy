@@ -1,6 +1,6 @@
 """Usage:
     ezjail-deploy [options] (bootstrap|install|list-blueprints)
-    ezjail-deploy [options] (init|prepare|configure|update|destroy) [JAIL]...
+    ezjail-deploy [options] (init|upload|prepare|configure|update|destroy) [JAIL]...
 
 Deploy a jail host and/or jail(s).
 
@@ -17,6 +17,8 @@ Commands:
     list-blueprints: display a list of all available blueprints
     init: call the `create`, `prepare` and `update`` methods of all given jails.
         if no jail is specified, *all* jails are targetted.
+
+    upload: renders and uploads the local file tree
 
     update: assumes that the jail's `create` and `prepare` methods have already run
         and executes their `update` method. if no jail is specified, *all* jails are
@@ -107,6 +109,8 @@ def main():
             jail.create()
             jail.prepare()
             jail.update()
+        elif arguments['upload']:
+            jail.upload()
         elif arguments['update']:
             jail.update()
         elif arguments['prepare']:
