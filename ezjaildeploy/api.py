@@ -60,8 +60,8 @@ class JailHost(object):
         ezjail.install(source=self.install_from, jailzfs=self.jailzfs, p=self.install_ports)
 
 
-class BaseJail(object):
-    """Represents a to-be-created or already existing jail instance.
+class BaseJail(dict):
+    """A dict-like representation of a to-be-created or already existing jail instance.
 
         It provides three methods: create, configure and update which it expects to be run
         from a fabfile with a connection to the jail host.
@@ -81,6 +81,21 @@ class BaseJail(object):
     preparehasrun = False
     ports_to_install = []
     jailhost = None
+
+    def __getitem__(self, attr):
+        try:
+            return super(BaseJail, self).__getitem__(attr)
+        except KeyError:
+            try:
+                return getattr(self, attr)
+            except AttributeError:
+                raise KeyError
+
+    def __setitem__(self, key, value, force=False):
+        if force:
+            super(BaseJail, self).__setitem__(key, value)
+        else:
+            raise KeyError
 
     def __init__(self, **config):
         """
@@ -102,7 +117,10 @@ class BaseJail(object):
         :param ctype: passed as ``-type`` to ``ezjail-admin create``
         """
         for key, value in config.items():
-            setattr(self, key, value)
+            try:
+                setattr(self, key, value)
+            except AttributeError:
+                self.__setitem__(key, value, force=True)
         # if we didn't get an explict name, set a default:
         if not self.name:
             self.name = self.__class__.__name__.split('Jail')[0].lower()
@@ -118,7 +136,7 @@ class BaseJail(object):
     def upload(self):
         if path.exists(self.fs_local_root):
             fab.sudo('rm -rf /tmp/%s' % self.name)
-            fs_rendered = render_site_structure(self.fs_local_root, vars(self))
+            fs_rendered = render_site_structure(self.fs_local_root, self)
             rsync_project('/tmp/%s/' % self.name, '%s/' % fs_rendered,
                 extra_opts='--perms --executability -v --super')
             fab.sudo('rsync -rav /tmp/%s/ /usr/jails/%s/' % (self.name, self.name))

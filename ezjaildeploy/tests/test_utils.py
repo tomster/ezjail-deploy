@@ -3,6 +3,7 @@ from filecmp import cmp
 from tempfile import mkdtemp
 from shutil import rmtree
 from pytest import raises
+from ezjaildeploy.api import BaseJail
 from ezjaildeploy.util import render_site_structure, render_template
 
 
@@ -22,26 +23,45 @@ def pytest_funcarg__examples(request):
         teardown=teardown, scope='function')
 
 
+class DummyJail(BaseJail):
+
+    @property
+    def access_control(self):
+        return '%s/16 allow' % self.ip_addr
+
+
 def  test_tempdir_created(examples):
     target_dir, fs_examples = examples
     fs_rendered = render_site_structure(path.join(fs_examples, 'unbound'),
-        dict(ip_addr='192.168.0.1'), target_dir)
+        dict(ip_addr='192.168.0.1', access_control='10.0.1.0/16 allow'), target_dir)
     assert fs_rendered != path.join(fs_examples, 'unbound')
 
 
 def  test_subdirectories_created(examples):
     target_dir, fs_examples = examples
     fs_rendered = render_site_structure(path.join(fs_examples, 'unbound'),
-        dict(ip_addr='192.168.0.1'), target_dir)
+        dict(ip_addr='192.168.0.1', access_control='10.0.1.0/16 allow'), target_dir)
     assert path.exists('%s/%s' % (fs_rendered, '/usr/local/etc'))
 
 
 def  test_string_replacement(examples):
     target_dir, fs_examples = examples
     fs_rendered = render_site_structure(path.join(fs_examples, 'unbound'),
-        dict(ip_addr='192.168.0.1'), target_dir)
+        dict(ip_addr='192.168.0.1', access_control='10.0.1.0/16 allow'), target_dir)
     fs_unbound_conf = path.join(fs_rendered, 'usr/local/etc/unbound/unbound.conf')
     assert ('interface: 192.168.0.1' in open(fs_unbound_conf).read())
+
+
+def  test_computed_string_replacement(examples):
+    """a jail instance can provide additional values computed from
+    configuration values."""
+    target_dir, fs_examples = examples
+    jail = DummyJail(ip_addr='192.168.0.1', fs_local_root=path.join(fs_examples, 'unbound'))
+    fs_rendered = render_site_structure(jail.fs_local_root, jail, target_dir)
+    fs_unbound_conf = path.join(fs_rendered, 'usr/local/etc/unbound/unbound.conf')
+    # eventhough we didn't provide it in the config explicitly, the
+    # access control has been computed from the ip_addr and rendered:
+    assert ('access-control: 192.168.0.1/16 allow' in open(fs_unbound_conf).read())
 
 
 def test_render_copy(examples):
@@ -50,7 +70,7 @@ def test_render_copy(examples):
     fs_source = path.join(fs_examples, 'unbound/etc/rc.conf')
     fs_rendered = render_template(fs_source,
         target_dir,
-        dict(ip_addr='192.168.0.1'))
+        dict(ip_addr='192.168.0.1', access_control='10.0.1.0/16 allow'))
     assert fs_rendered.endswith('/rc.conf')
     assert (cmp(fs_source, fs_rendered))
 
@@ -62,7 +82,7 @@ def test_render_template(examples):
     fs_rendered = render_template(path.join(fs_examples,
             'unbound/usr/local/etc/unbound/unbound.conf.tmpl'),
         target_dir,
-        dict(ip_addr='192.168.0.1'))
+        dict(ip_addr='192.168.0.1', access_control='10.0.1.0/16 allow'))
     assert fs_rendered.endswith('/unbound.conf')
     assert ('interface: 192.168.0.1' in open(fs_rendered).read())
 
