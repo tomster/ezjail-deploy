@@ -45,4 +45,6 @@ class UnboundJail(BaseJail):
 
     @property
     def access_control(self):
+        """Compute an access control statement from the jail's
+        IP address that allows all machines on that network access"""
         return '%s.0/16 allow' % '.'.join(self.ip_addr.split('.')[:3])

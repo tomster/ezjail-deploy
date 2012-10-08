@@ -10,14 +10,22 @@ Replace the value for ``ip_addr`` with that of your jail host.
 Bootstrapping
 =============
 
-Bootstrapping is an optional convenience command to setup the jail host to meet the requirements to install and run ezjail-deploy.
+In order for ``ezjail-deploy`` to work, the following requirements must be met on the jail host:
 
-The default bootstrap does the following:
+ * ``sudo``, ``rsync`` and ``ezjail`` must be installed
+ * ssh access for an account with sudo privileges
 
- * creates and admin user and uploads his sshkey 
- * installs ``sudo`` and enables passwordless access for the admin user
+If you're host already meets these requirements or if you want to provide them manually, you can skip to the next section ''Deploying a simple jail''.
 
-In order to run bootstrap on a remote host, the following criteria must be met:
+Otherwise, ``ezjail-deploy`` provides two convenience commands to setup the jail host to meet those requirements: ``bootstrap`` and ``install``.
+
+The  ``bootstrap`` command does the following:
+
+ * creates an admin user and uploads his sshkey 
+ * installs ``sudo``, ``rsync`` and ``ezjail``
+ * enables passwordless access for the admin user
+
+However, ``bootstrap`` itself still has some requirements of its own which you must provide manually:
 
  * ``sshd`` is up and running on ``ip_addr``
  * ``RootLogin`` is enabled (in ``/etc/ssh/sshd_config``)
@@ -26,11 +34,9 @@ Then ``cd`` into the examples directory and::
 
     # ezjail-deploy bootstrap
 
-If you already have remote sudo access (i.e. if your testing this locally) you can skip bootstrapping by running the ``install`` command directly::
 
-    # ezjail-deploy install
-
-Note: running ``bootstrap`` will always also run ``install`` for you.
+Deploying a simple jail
+=======================
 
 Either way, you now should be able to ssh into the host and run ezjail-admin::
 
@@ -40,15 +46,50 @@ Either way, you now should be able to ssh into the host and run ezjail-admin::
     ezjail-admin v3.2
     Usage: ezjail-admin [archive|config|console|create|delete|install|list|restore|update] {params}
 
-
-Deploying a jail
-================
-
-Now you're ready to deploy the first example. First, exit the ssh shell - from now on we're going to do everything remotely, afterall::
+Now you're ready to deploy the first example. First, exit the ssh shell again - from now on we're going to do everything remotely, afterall :-)::
 
     $ exit
 
-For this example we will install a simple forwarding and caching nameserver using the excellent ``unbound`` daemon. To do so simply run::
+Now add the following lines to your ``jails.conf``::
+
+    [simple]
+    ip_addr = 192.168.91.128
+
+then run::
+
+    # ezjail-deploy init simple
+
+It will now create and start a jail instance named ``simple``, the existence of which you should be able to verify using the ``list-jails`` command::
+
+    # exjail-deploy list-jails
+
+However, since this jail doesn't do anything useful, let's get rid of it before moving on. To that end type::
+
+    # exjail-deploy destroy simple
+
+After answering ``YES`` to the confirmation dialog, the jail will have vanished. See for yourself::
+
+    # exjail-deploy list-jails
+
+
+Deploying a nameserver jail
+===========================
+
+Now, let's move on to an example that actually provides a pre-configured, useful feature: a simple forwarding and caching nameserver using the excellent ``unbound`` daemon. To do so simply rename the ``[simple]`` section in ``jails.conf`` to ``[unbound]``, so that your its contents now looks like this::
+
+    [host]
+    ip_addr = 192.168.91.128
+
+    [unbound]
+    ip_addr = 192.168.91.128
+
+Note, that by virtue of the new jail's name matching a blueprint definition inside ``blueprints.py`` that jail instance is already associated with it. If you don't want to name your jail instance like its blueprint, you could do so and refer to the blueprint it should use explicitly like so::
+
+    [nameserver]
+    blueprint = UnboundJail
+    ip_addr = 192.168.91.128
+
+Then run::
 
     # ezjail-deploy init unbound
 
@@ -63,6 +104,38 @@ This will:
 
     # dig @192.168.91.128 github.com
 
+If you look at the actual blueprint you will notice that all that was necessary for this were two lines of configuration::
 
-Nameserver Jail
----------------
+    [unbound]
+    ip_addr = 192.168.91.128
+
+five lines of code::
+
+     class UnboundJail(BaseJail):
+        ports_to_install = ['dns/unbound']
+
+        @property
+        def access_control(self):
+            return '%s.0/16 allow' % '.'.join(self.ip_addr.split('.')[:3])
+
+and a file tree consisting of a bunch of files::
+
+    etc/rc.conf                                # enabling unbound daemon
+    usr/local/etc/unbound/unbound.conf.tmpl    # unbound configuration
+    var/db/ports/unbound/options               # port configuration
+    var/db/ports/openssl/options
+    var/db/ports/libiconv/options
+    var/db/ports/perl/options
+
+Also note, that if you don't like how this blueprint computes the access control you have two options three override this behavior.
+
+Firstly, you could simple edit the ``access_control`` method in ``blueprints.py``.
+
+Secondly, you could subclass the ``UnboundJail`` class and override the ``access_control`` method.
+
+Or thirdly, you could simply override the return value of that method by adding an alternative value in ``jails.conf``::
+
+    [unbound]
+    ip_addr = 192.168.91.128
+    access_control = 192.168.91.0/24
+
