@@ -4,7 +4,7 @@ from tempfile import mkdtemp
 from shutil import copy2
 
 
-def render_site_structure(fs_source_root, context):
+def render_site_structure(fs_source_root, context, fs_target_root=None):
     """Recursively copies the given filesystem path to a temporary directory.
     Any files ending in `.tmpl` are interpreted as templates using Python
     string formatting and rendered using the context dictionary, thereby losing
@@ -12,7 +12,8 @@ def render_site_structure(fs_source_root, context):
 
     Returns the absolute path to the rendered, temporary directory.
     """
-    fs_target_root = mkdtemp()
+    if fs_target_root is None:
+        fs_target_root = mkdtemp()
     for fs_source_dir, local_directories, local_files in os.walk(fs_source_root):
         fs_target_dir = path.abspath(path.join(fs_target_root, path.relpath(fs_source_dir, fs_source_root)))
         for local_file in local_files:
