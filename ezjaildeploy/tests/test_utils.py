@@ -2,6 +2,7 @@ from os import path
 from filecmp import cmp
 from tempfile import mkdtemp
 from shutil import rmtree
+from pytest import raises
 from ezjaildeploy.util import render_site_structure, render_template
 
 
@@ -64,3 +65,12 @@ def test_render_template(examples):
         dict(ip_addr='192.168.0.1'))
     assert fs_rendered.endswith('/unbound.conf')
     assert ('interface: 192.168.0.1' in open(fs_rendered).read())
+
+
+def test_render_missing_key(examples):
+    target_dir, fs_examples = examples
+    with raises(KeyError):
+        render_template(path.join(fs_examples,
+                'unbound/usr/local/etc/unbound/unbound.conf.tmpl'),
+            target_dir,
+            dict())
