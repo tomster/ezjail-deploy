@@ -139,3 +139,10 @@ Or thirdly, you could simply override the return value of that method by adding 
     ip_addr = 192.168.91.128
     access_control = 192.168.91.0/24
 
+
+TODO:
+ * example of two instances using the same blueprint (i.e. two nginx instances)
+ * example using custom ``configure``
+ * example using custom ``update``
+ * example without config file (only 'hard coded' blueprints file)
+ * example of one blueprint using config data of another instance (i.e. varnish pointing to nginx)
