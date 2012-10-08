@@ -1,5 +1,6 @@
 import inspect
 from os import path
+from shutil import rmtree
 from collections import OrderedDict
 from fabric import api as fab
 from fabric.contrib.project import rsync_project
@@ -141,6 +142,7 @@ class BaseJail(dict):
                 extra_opts='--perms --executability -v --super')
             fab.sudo('rsync -rav /tmp/%s/ /usr/jails/%s/' % (self.name, self.name))
             fab.sudo('rm -rf /tmp/%s' % self.name)
+            rmtree(fs_rendered)
 
     def prepare(self):
         # upload site root (it might contain port configuration)
