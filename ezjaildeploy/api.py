@@ -47,9 +47,9 @@ class JailHost(object):
             else:
                 try:
                     jail_factory = getattr(blueprints, config['jail_name']['blueprint'])
-                except AttributeError:
-                    exit('%s not in blueprints, you need to specify name of blueprint class explictly in the config')
-            self.jails[jail_name] = jail_factory(jailhost=self, **config.get(jail_name, dict()))
+                except KeyError:
+                    jail_factory = BaseJail
+            self.jails[jail_name] = jail_factory(jailhost=self, name=jail_name, **config.get(jail_name, dict()))
 
     def bootstrap(self):
         # run ezjailremote's basic bootstrap
