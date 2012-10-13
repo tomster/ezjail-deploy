@@ -1,11 +1,11 @@
-This directory contains tested and working examples. You should be able to run them simply by providing a custom ``jails.conf`` for your host environment.
+This directory contains tested and working examples. You should be able to run them simply by providing a custom ``jails.conf`` for your host environment. The following examples assume that you're working from a local copy of the ``examples`` directory that contain this README and have SSH access to a FreeBSD Host.
 
 To get started, create a minimal version of ``jails.conf`` like so::
 
     [host]
     ip_addr = 192.168.91.128
 
-Replace the value for ``ip_addr`` with that of your jail host. 
+Obviously, you'll need to replace the value for ``ip_addr`` with that of your jail host. 
 
 Bootstrapping
 =============
@@ -13,17 +13,15 @@ Bootstrapping
 In order for ``ezjail-deploy`` to work, the following requirements must be met on the jail host:
 
  * ``sudo``, ``rsync`` and ``ezjail`` must be installed
- * ssh access for an account with sudo privileges
+ * SSH access for an account with sudo privileges
 
 If you're host already meets these requirements or if you want to provide them manually, you can skip to the next section ''Deploying a simple jail''.
 
-Otherwise, ``ezjail-deploy`` provides two convenience commands to setup the jail host to meet those requirements: ``bootstrap`` and ``install``.
+Otherwise, ``ezjail-deploy`` provides a convenience command ``bootstrap`` which does the following:
 
-The  ``bootstrap`` command does the following:
-
- * creates an admin user and uploads his sshkey 
- * installs ``sudo``, ``rsync`` and ``ezjail``
- * enables passwordless access for the admin user
+ * creates an admin user
+ * configures SSH access
+ * installs and configures ``sudo``, ``rsync`` and ``ezjail``
 
 However, ``bootstrap`` itself still has some requirements of its own which you must provide manually:
 

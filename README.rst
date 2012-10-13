@@ -1,4 +1,4 @@
-``ezjail-deploy`` provides a Python API for configuring, deploying and upgrading FreeBSD jails.
+``ezjail-deploy`` provides a Python API and command line tool for configuring, deploying and upgrading FreeBSD jails.
 
 Changelog
 ---------
