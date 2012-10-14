@@ -30,7 +30,7 @@ import sys
 from docopt import docopt
 from fabric import api as fab
 from os import path
-from mrbob.parsing import parse_config
+from mrbob.parsing import ConfigParser
 
 
 def main():
@@ -41,7 +41,9 @@ def main():
     fs_config = arguments['--config']
     config = dict()
     if path.exists(fs_config):
-        config = parse_config(fs_config)['variables']
+        parser = ConfigParser()
+        parser.read(fs_config)
+        config = parser.as_dict()
 
     # instantiate host and jails
     fs_dir, fs_blueprint = path.split(path.abspath(arguments['--blueprints']))
