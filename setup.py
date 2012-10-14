@@ -26,6 +26,7 @@ setup(name='ezjaildeploy',
       zip_safe=False,
       install_requires=[
         "ezjailremote",
+        "mr.bob",
         "docopt",
           # -*- Extra requirements: -*-
       ],

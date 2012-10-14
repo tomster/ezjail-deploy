@@ -1,12 +1,13 @@
 import inspect
 from os import path
 from shutil import rmtree
+from tempfile import mkdtemp
 from collections import OrderedDict
 from fabric import api as fab
 from fabric.contrib.project import rsync_project
 from ezjailremote import fabfile as ezjail
 
-from util import render_site_structure
+from mrbob.rendering import render_structure, python_formatting_renderer
 
 
 class JailHost(object):
@@ -137,7 +138,8 @@ class BaseJail(dict):
     def upload(self):
         if path.exists(self.fs_local_root):
             fab.sudo('rm -rf /tmp/%s' % self.name)
-            fs_rendered = render_site_structure(self.fs_local_root, self)
+            fs_rendered = mkdtemp()
+            render_structure(self.fs_local_root, fs_rendered, self, python_formatting_renderer)
             rsync_project('/tmp/%s/' % self.name, '%s/' % fs_rendered,
                 extra_opts='--perms --executability -v --super')
             fab.sudo('rsync -rav /tmp/%s/ /usr/jails/%s/' % (self.name, self.name))

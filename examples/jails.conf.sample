@@ -1,6 +1,4 @@
-[host]
-ip_addr = 192.168.91.128
-root_device = ada0
-
-[unbound]
-ip_addr = 192.168.91.128
+[variables]
+host.ip_addr = 192.168.91.128
+host.root_device = ada0
+unbound.ip_addr = 192.168.91.128

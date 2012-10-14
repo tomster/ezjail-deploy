@@ -2,8 +2,8 @@ This directory contains tested and working examples. You should be able to run t
 
 To get started, create a minimal version of ``jails.conf`` like so::
 
-    [host]
-    ip_addr = 192.168.91.128
+    [variables]
+    host.ip_addr = 192.168.91.128
 
 Obviously, you'll need to replace the value for ``ip_addr`` with that of your jail host. 
 
@@ -50,8 +50,7 @@ Now you're ready to deploy the first example. First, exit the ssh shell again - 
 
 Now add the following lines to your ``jails.conf``::
 
-    [simple]
-    ip_addr = 192.168.91.128
+    simple.ip_addr = 192.168.91.128
 
 then run::
 
@@ -75,17 +74,15 @@ Deploying a nameserver jail
 
 Now, let's move on to an example that actually provides a pre-configured, useful feature: a simple forwarding and caching nameserver using the excellent ``unbound`` daemon. To do so simply rename the ``[simple]`` section in ``jails.conf`` to ``[unbound]``, so that your its contents now looks like this::
 
-    [host]
-    ip_addr = 192.168.91.128
-
-    [unbound]
-    ip_addr = 192.168.91.128
+    [variables]
+    host.ip_addr = 192.168.91.128
+    unbound.ip_addr = 192.168.91.128
 
 Note, that by virtue of the new jail's name matching a blueprint definition inside ``blueprints.py`` that jail instance is already associated with it. If you don't want to name your jail instance like its blueprint, you could do so and refer to the blueprint it should use explicitly like so::
 
-    [nameserver]
-    blueprint = UnboundJail
-    ip_addr = 192.168.91.128
+
+    nameserver.blueprint = UnboundJail
+    nameserver.ip_addr = 192.168.91.128
 
 Then run::
 
@@ -104,8 +101,7 @@ This will:
 
 If you look at the actual blueprint you will notice that all that was necessary for this were two lines of configuration::
 
-    [unbound]
-    ip_addr = 192.168.91.128
+    unbound.ip_addr = 192.168.91.128
 
 five lines of code::
 
@@ -133,9 +129,8 @@ Secondly, you could subclass the ``UnboundJail`` class and override the ``access
 
 Or thirdly, you could simply override the return value of that method by adding an alternative value in ``jails.conf``::
 
-    [unbound]
-    ip_addr = 192.168.91.128
-    access_control = 192.168.91.0/24
+    unbound.ip_addr = 192.168.91.128
+    unbound.access_control = 192.168.91.0/24
 
 
 TODO:
