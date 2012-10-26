@@ -87,7 +87,10 @@ def main():
             if arguments['--verbose']:
                 description = blueprint.__doc__
             else:
-                description = blueprint.__doc__.split('\n')[0]
+                try:
+                    description = blueprint.__doc__.split('\n')[0]
+                except AttributeError:
+                    description = ""
             print '%s: %s' % (name, description)
         exit()
 
