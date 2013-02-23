@@ -13,6 +13,7 @@ class JailHost(object):
 
     jailzfs = None
     ip_addr = None
+    sshd_port = '22'
     install_ports = True
     install_from = 'pkg_add'
 

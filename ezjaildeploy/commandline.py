@@ -74,6 +74,7 @@ def main():
 
     # 'point' fabric to the jail host
     fab.env['host_string'] = jailhost.ip_addr
+    fab.env['port'] = jailhost.sshd_port
 
     # execute the bootstrap and/or install command
     if arguments['bootstrap']:
