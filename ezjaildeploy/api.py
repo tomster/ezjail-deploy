@@ -167,4 +167,4 @@ class BaseJail(dict):
         """ execute the given command inside the jail by calling ezjail-admin console.
         This is particularly useful for jails w/o sshd and/or a public IP
         """
-        return fab.sudo('''ezjail-admin console -e "%s" %s''' % (command, self.name))
+        return fab.sudo("""ezjail-admin console -e "\"%s %s"\"""" % (command, self.name))
