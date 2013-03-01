@@ -26,7 +26,6 @@ class JailHost(object):
         self.config = config
         for key, value in config.get('host', dict()).items():
             setattr(self, key, value)
-
         if blueprints is None:
             from ezjailremote import api  # use examples instead
             blueprints = api
@@ -84,12 +83,14 @@ class JailHost(object):
 class BaseJail(dict):
     """A dict-like representation of a to-be-created or already existing jail instance.
 
-        It provides three methods: create, configure and update which it expects to be run
-        from a fabfile with a connection to the jail host.
+        It provides two main methods: ``init`` and ``update`` which it expects to be run from a fabfile with a connection to the jail host.
 
-        ``create`` and ``configure`` are expected to be run as-is, whereas ``extra_configure``
-        (which is called by ``configure`` at the end) and ``update`` are expected to be overridden
+        The init command is used to initially create the jail
+
+        ``init`` is expected to be run as-provided, whereas ``update`` needs to be provided
         by any subclass.
+
+        Note that ``init`` itself calls the ``configure`` command which it also expects to be provided by the subclass.
 
     """
 
@@ -151,10 +152,23 @@ class BaseJail(dict):
         if self.fs_remote_root is None:
             self.fs_remote_root = '/usr/jails/%s' % self.name
 
-    def create(self):
+    def init(self):
+        """ create the jail from scratch """
+        self.jailhost._snapshot(name='%s-pre-init' % self.name)
+        self._create()
+        self._upload()
+        self._prepare()
+        self.configure()
+        self.preparehasrun = True
+        self.update()
+        self.jailhost._snapshot(name='%s-post-init' % self.name)
+
+    def _create(self):
+        """ create the jail instance """
         ezjail.create(self.name, self.ip_addr, ctype=self.ctype, sshd=self.sshd)
 
-    def upload(self):
+    def _upload(self):
+        """ upload/update the site structure """
         if path.exists(self.fs_local_root):
             fab.sudo('rm -rf /tmp/%s' % self.name)
             fs_rendered = render_site_structure(self.fs_local_root, self)
@@ -164,20 +178,10 @@ class BaseJail(dict):
             fab.sudo('rm -rf /tmp/%s' % self.name)
             rmtree(fs_rendered)
 
-    def prepare(self):
-        # upload site root (it might contain port configuration)
-        self.upload()
+    def _prepare(self):
         # install ports
         for port in self.ports_to_install:
             self.console('make -C /usr/ports/%s install' % port)
-        self.configure()
-        self.preparehasrun = True
-
-    def configure(self):
-        pass
-
-    def update(self):
-        pass
 
     def destroy(self):
         return ezjail.destroy(self.name)
@@ -186,4 +190,10 @@ class BaseJail(dict):
         """ execute the given command inside the jail by calling ezjail-admin console.
         This is particularly useful for jails w/o sshd and/or a public IP
         """
-        return fab.sudo("""ezjail-admin console -e "\"%s %s"\"""" % (command, self.name))
+        return fab.sudo("""ezjail-admin console -e "%s" %s""" % (command, self.name))
+
+    def configure(self):
+        NotImplemented
+
+    def update(self):
+        NotImplemented

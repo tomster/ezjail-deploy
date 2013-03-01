@@ -74,6 +74,8 @@ def main():
 
     # 'point' fabric to the jail host
     fab.env['host_string'] = jailhost.ip_addr
+    fab.env['host'] = jailhost.ip_addr
+    fab.env['hosts'] = [jailhost.ip_addr]
     fab.env['port'] = jailhost.sshd_port
 
     # execute the bootstrap and/or install command
@@ -114,20 +116,20 @@ def main():
     # execute the jail command
     for jail_name in jails:
         jail = jailhost.jails[jail_name]
+        # the main entry points
         if arguments['init']:
-            jail.create()
-            jail.prepare()
-            jail.update()
-        elif arguments['upload']:
-            jail.upload()
+            jail.init()
         elif arguments['update']:
             jail.update()
-        elif arguments['prepare']:
-            jail.prepare()
-        elif arguments['configure']:
-            jail.configure()
         elif arguments['destroy']:
             jail.destroy()
+        # the remainder are usually only used for debugging
+        elif arguments['upload']:
+            jail._upload()
+        elif arguments['prepare']:
+            jail._prepare()
+        elif arguments['configure']:
+            jail._configure()
 
 
 if __name__ == '__main__':
