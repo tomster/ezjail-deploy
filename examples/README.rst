@@ -125,7 +125,7 @@ and a file tree consisting of a bunch of files::
     var/db/ports/libiconv/options
     var/db/ports/perl/options
 
-Also note, that if you don't like how this blueprint computes the access control you have two options three override this behavior.
+Also note, that if you don't like how this blueprint computes the access control you have three options to override this behavior.
 
 Firstly, you could simple edit the ``access_control`` method in ``blueprints.py``.
 
