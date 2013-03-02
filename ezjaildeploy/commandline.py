@@ -129,7 +129,7 @@ def main():
         elif arguments['prepare']:
             jail._prepare()
         elif arguments['configure']:
-            jail._configure()
+            jail.configure()
 
 
 if __name__ == '__main__':
