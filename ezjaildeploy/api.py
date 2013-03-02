@@ -177,6 +177,8 @@ class BaseJail(dict):
             fab.sudo('rsync -rav /tmp/%s/ /usr/jails/%s/' % (self.name, self.name))
             fab.sudo('rm -rf /tmp/%s' % self.name)
             rmtree(fs_rendered)
+        # fix root access permissions
+        fab.sudo('chmod a+rx %s' % self.fs_remote_root)
 
     def _prepare(self):
         # install ports
