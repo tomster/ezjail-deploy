@@ -1,6 +1,6 @@
 """Usage:
     ezjail-deploy [options] (bootstrap|install|list-blueprints|list-jails)
-    ezjail-deploy [options] (init|upload|prepare|configure|update|destroy) [JAIL]...
+    ezjail-deploy [options] (init|upload|prepare|configure|update|destroy|debug) [JAIL]...
 
 Deploy a jail host and/or jail(s).
 
@@ -130,7 +130,5 @@ def main():
             jail._prepare()
         elif arguments['configure']:
             jail.configure()
-
-
-if __name__ == '__main__':
-    main()
+        elif arguments['debug']:
+            jail._debug()
