@@ -46,7 +46,7 @@ class ConfigParser(ConfigParser_.SafeConfigParser):
         return d
 
 
-def main():
+def main(blueprints=None):
     # parse the command line arguments
     arguments = docopt(__doc__)
 
@@ -64,9 +64,10 @@ def main():
                 config[key] = parsed_dict[key]
 
     # instantiate host and jails
-    fs_dir, fs_blueprint = path.split(path.abspath(arguments['--blueprints']))
-    sys.path.insert(0, fs_dir)
-    blueprints = __import__(path.splitext(fs_blueprint)[0])
+    if blueprints is None:
+        fs_dir, fs_blueprint = path.split(path.abspath(arguments['--blueprints']))
+        sys.path.insert(0, fs_dir)
+        blueprints = __import__(path.splitext(fs_blueprint)[0])
     # inject location of the config file so jails can resolve relative paths
     config['_fs_config'] = path.dirname(path.abspath(fs_config))
     jailhost = getattr(blueprints, config.get('host', dict()).get('blueprint',
