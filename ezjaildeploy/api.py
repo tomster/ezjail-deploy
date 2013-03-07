@@ -76,7 +76,7 @@ class JailHost(object):
         else:
             zfs_fs = '%s/%s' % (self.jailzfs, jail)
 
-        snapshot_name = '%s@%s-%s' % (zfs_fs, name, datetime.now().isoformat())
+        snapshot_name = '%s@%s-%s' % (zfs_fs, datetime.now().isoformat(), name)
         fab.sudo("""zfs snapshot %s""" % snapshot_name)
 
 
