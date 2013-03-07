@@ -74,9 +74,13 @@ def main(blueprints=None):
         'JailHost'))(blueprints, config)
 
     # 'point' fabric to the jail host
-    fab.env['host_string'] = jailhost.ip_addr
-    fab.env['host'] = jailhost.ip_addr
-    fab.env['hosts'] = [jailhost.ip_addr]
+    if jailhost.public_ip_addr is not None:
+        ip_addr = jailhost.public_ip_addr
+    else:
+        ip_addr = jailhost.ip_addr
+    fab.env['host_string'] = ip_addr
+    fab.env['host'] = ip_addr
+    fab.env['hosts'] = [ip_addr]
     fab.env['port'] = jailhost.sshd_port
 
     # execute the bootstrap and/or install command

@@ -14,6 +14,7 @@ class JailHost(object):
 
     jailzfs = None
     ip_addr = None
+    public_ip_addr = None  # use this if the host is behind NAT to access it
     sshd_port = '22'
     install_ports = True
     install_from = 'pkg_add'
