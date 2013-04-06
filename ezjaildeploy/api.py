@@ -189,6 +189,7 @@ class BaseJail(dict):
     def _prepare(self):
         # install ports
         for port in self.ports_to_install:
+            self.console('make -C /usr/ports/%s fetch-recursive' % port)
             self.console('make -C /usr/ports/%s install' % port)
 
     def destroy(self):
