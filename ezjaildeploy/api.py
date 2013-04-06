@@ -52,7 +52,12 @@ class JailHost(object):
                     jail_factory = getattr(blueprints, config['jail_name']['blueprint'])
                 except KeyError:
                     jail_factory = BaseJail
-            self.jails[jail_name] = jail_factory(jailhost=self, name=jail_name, **config.get(jail_name, dict()))
+            jail_config = config.get(jail_name, dict())
+            if 'name' in jail_config:
+                real_jail_name = jail_config.pop('name')
+            else:
+                real_jail_name = jail_name
+            self.jails[jail_name] = jail_factory(jailhost=self, name=real_jail_name, **jail_config)
 
     def bootstrap(self):
         # run ezjailremote's basic bootstrap
