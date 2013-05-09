@@ -167,3 +167,4 @@ class JailSystem(object):
                 continue
             jail_factory = instance_from_dotted_name(jail_config['blueprint'])
             self.jails[jail_name] = jail_factory(**jail_config)
+            self.jails[jail_name].jailhost = self.host

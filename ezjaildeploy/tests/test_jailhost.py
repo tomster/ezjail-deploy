@@ -44,6 +44,10 @@ def test_jailinstance(system, config):
     assert system.jails['unbound'].ip_addr == config['unbound']['ip_addr']
 
 
+def test_jailinstance_has_ref_to_host(system, config):
+    system.jails['unbound'].jailhost is system.host
+
+
 def test_jailinstance_default(system):
     assert system.jails['unbound'].ports_to_install == ['dns/unbound']
 
