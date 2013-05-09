@@ -27,6 +27,7 @@ setup(name='ezjaildeploy',
     install_requires=[
         "ezjailremote",
         "docopt",
+        "propdict"
         # -*- Extra requirements: -*-
     ],
     extras_require={
