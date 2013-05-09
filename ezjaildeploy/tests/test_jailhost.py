@@ -1,6 +1,6 @@
 from pytest import fixture
 from ezjaildeploy.api import JailHost, JailSystem
-from ezjaildeploy.examples.blueprints import UnboundJail
+from ezjaildeploy.examples.blueprints import UnboundJail, CryptoJailHost
 
 
 @fixture
@@ -25,6 +25,12 @@ def system(config):
 def test_jailhost(system, config):
     assert isinstance(system.host, JailHost)
     assert system.host.ip_addr == config['host']['ip_addr']
+
+
+def test_custom_jailhost(config):
+    config['host']['blueprint'] = 'ezjaildeploy.examples.blueprints.CryptoJailHost'
+    instance = system(config)
+    assert isinstance(instance.host, CryptoJailHost)
 
 
 def test_jailinstance(system, config):

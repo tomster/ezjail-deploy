@@ -158,7 +158,9 @@ class JailSystem(object):
         the jail host.
         any other entries that don't start with an underscore are treated as jail definitions.
         """
-        self.host = JailHost(**config.pop('host', dict()))
+        host_config = config.pop('host', dict())
+        host_factory = instance_from_dotted_name(host_config.get('blueprint', 'ezjaildeploy.api.JailHost'))
+        self.host = host_factory(**host_config)
         self.jails = OrderedDict()
         for jail_name, jail_config in config.iteritems():
             if jail_name.startswith('_'):
