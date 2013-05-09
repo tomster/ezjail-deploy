@@ -90,11 +90,7 @@ class BaseJail(propdict):
         :param fs_remote_root: path to the jail, defaults to ``/usr/jails/NAMEOFJAIL``.
         :param ctype: passed as ``-type`` to ``ezjail-admin create``
         """
-        for key, value in config.items():
-            try:
-                setattr(self, key, value)
-            except AttributeError:
-                self.__setitem__(key, value, force=True)
+        super(BaseJail, self).__init__(**config)
         # if we didn't get an explict name, set a default:
         if not self.name:
             self.name = self.__class__.__name__.split('Jail')[0].lower()
