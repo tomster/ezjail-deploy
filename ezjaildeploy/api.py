@@ -119,7 +119,7 @@ class BaseJail(propdict):
         """ upload/update the site structure """
         if path.exists(self.fs_local_root):
             fab.sudo('rm -rf /tmp/%s' % self.name)
-            fs_rendered = render_site_structure(self.fs_local_root, self)
+            fs_rendered = render_site_structure(fs_source_root=self.fs_local_root, context=self)
             rsync_project('/tmp/%s/' % self.name, '%s/' % fs_rendered,
                 extra_opts='--perms --executability -v --super')
             fab.sudo('rsync -rav /tmp/%s/ /usr/jails/%s/' % (self.name, self.name))
