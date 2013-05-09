@@ -1,26 +1,16 @@
 from os import path
 from filecmp import cmp
-from tempfile import mkdtemp
-from shutil import rmtree
-from pytest import raises
+from pytest import raises, fixture
 from ezjaildeploy.api import BaseJail
 from ezjaildeploy.util import render_site_structure, render_template
 
 
-def pytest_funcarg__examples(request):
-    def setup():
-        import ezjaildeploy
-        fs_tempdir = mkdtemp()
-        return (fs_tempdir,
-            path.abspath(path.join(path.dirname(ezjaildeploy.__file__),
-                'examples')))
-
-    def teardown(examples):
-        fs_tempdir, fs_examples = examples
-        rmtree(fs_tempdir)
-
-    return request.cached_setup(setup=setup,
-        teardown=teardown, scope='function')
+@fixture
+def examples(request, tmpdir):
+    import ezjaildeploy
+    return (str(tmpdir),
+        path.abspath(path.join(path.dirname(ezjaildeploy.__file__),
+            'examples')))
 
 
 class DummyJail(BaseJail):
