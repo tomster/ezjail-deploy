@@ -22,7 +22,7 @@ def test_property_dict_access_override():
 
 def test_key_error_raised():
     jail = DummyJail()
-    with raises(KeyError):
+    with raises(AttributeError):
         jail['foo']
 
 
@@ -35,9 +35,3 @@ def test_attribute_error_raised():
 def test_item_access_via_property():
     jail = DummyJail(foo='bar')
     assert jail.foo == 'bar'
-
-
-def test_item_not_writable():
-    jail = DummyJail()
-    with raises(KeyError):
-        jail['foo'] = 'bar'
