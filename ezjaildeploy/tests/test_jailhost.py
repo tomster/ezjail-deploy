@@ -36,6 +36,14 @@ def test_custom_jailhost(config):
     assert isinstance(instance.host, CryptoJailHost)
 
 
+def test_custom_blueprint_for_jailhost(config):
+    del config['unbound']['blueprint']
+    from ezjaildeploy.examples import blueprints
+    config['_blueprints'] = blueprints
+    instance = system(config)
+    assert isinstance(instance.jails['unbound'], blueprints.UnboundJail)
+
+
 def test_jailinstance(system, config):
     assert isinstance(system.jails['unbound'], UnboundJail)
     assert system.jails['unbound'].ip_addr == config['unbound']['ip_addr']
