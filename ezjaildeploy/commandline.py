@@ -76,7 +76,7 @@ def main(args, **kwargs):
         exit()
 
     if arguments['list-blueprints']:
-        for name, blueprint in jailhost.available_blueprints.items():
+        for name, blueprint in jailsystem.jails.items():
             if arguments['--verbose']:
                 description = blueprint.__doc__
             else:
@@ -91,34 +91,22 @@ def main(args, **kwargs):
         fab.sudo('ezjail-admin list')
         exit()
 
-    # validate the jail name(s)
-    jails = arguments['JAIL']
-    config_jails = jailhost.jails.keys()
-    alljails = set(config_jails).union(set(jailhost.available_blueprints))
-    difference = set(jails).difference(alljails)
-    if difference:
-        print "invalid jail%s %s! (needs to be one of %s)" % \
-            (len(difference) > 1 and 's' or '',
-                ', '.join(list(difference)),
-                ', '.join(list(alljails)))
-        exit()
+    jail_name = arguments['JAIL'][0]
+    jail = jailsystem.jails[jail_name]
 
-    # execute the jail command
-    for jail_name in jails:
-        jail = jailhost.jails[jail_name]
-        # the main entry points
-        if arguments['init']:
-            jail.init()
-        elif arguments['update']:
-            jail.update()
-        elif arguments['destroy']:
-            jail.destroy()
-        # the remainder are usually only used for debugging
-        elif arguments['upload']:
-            jail._upload()
-        elif arguments['prepare']:
-            jail._prepare()
-        elif arguments['configure']:
-            jail.configure()
-        elif arguments['debug']:
-            jail._debug()
+    # the main entry points
+    if arguments['init']:
+        jail.init()
+    elif arguments['update']:
+        jail.update()
+    elif arguments['destroy']:
+        jail.destroy()
+    # the remainder are usually only used for debugging
+    elif arguments['upload']:
+        jail._upload()
+    elif arguments['prepare']:
+        jail._prepare()
+    elif arguments['configure']:
+        jail.configure()
+    elif arguments['debug']:
+        jail._debug()
