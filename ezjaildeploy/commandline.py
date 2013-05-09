@@ -34,7 +34,7 @@ from ezjaildeploy.util import get_config
 from ezjaildeploy.api import JailSystem
 
 
-def main(blueprints=None):
+def main(args, **kwargs):
     # parse the command line arguments
     arguments = docopt(__doc__)
 
@@ -42,21 +42,27 @@ def main(blueprints=None):
     fs_config = arguments['--config']
     config = get_config(fs_config)
 
-    # instantiate host and jails
-    if blueprints is None:
+    # inject custom blueprints into sys.path
+    if arguments.get('--blueprints') is None:
+        blueprints = None
+    else:
         fs_dir, fs_blueprint = path.split(path.abspath(arguments['--blueprints']))
         sys.path.insert(0, fs_dir)
-        blueprints = __import__(path.splitext(fs_blueprint)[0])
+        blueprints = __import__(fs_blueprint.strip('.py'))
+
     # inject location of the config file so jails can resolve relative paths
     config['_fs_config'] = path.dirname(path.abspath(fs_config))
-    jailhost = getattr(blueprints, config.get('host', dict()).get('blueprint',
-        'JailHost'))(blueprints, config)
+
+    # instantiate the jail system
+    jailsystem = JailSystem(_blueprints=blueprints, **config)
+    jailhost = jailsystem.host
 
     # 'point' fabric to the jail host
     if jailhost.public_ip_addr is not None:
         ip_addr = jailhost.public_ip_addr
     else:
         ip_addr = jailhost.ip_addr
+
     fab.env['host_string'] = ip_addr
     fab.env['host'] = ip_addr
     fab.env['hosts'] = [ip_addr]

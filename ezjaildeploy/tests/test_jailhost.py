@@ -17,9 +17,6 @@ def config():
         '_not_a_jail': {
             'foo': 23
         },
-        'also_not_a_jail': {
-            'bar': 'baz',
-        }
     }
 
 
@@ -72,5 +69,9 @@ def test_underscore_skipped_as_jail(system):
     assert '_not_a_jail' not in system.jails
 
 
-def test_jail_entry_without_blueprint_skipped(system):
-    assert 'also_not_a_jail' not in system.jails
+def test_jail_entry_without_blueprint_skipped(config):
+    config['also_not_a_jail'] = {
+            'bar': 'baz',
+        }
+    instance = system(config)
+    assert 'also_not_a_jail' not in instance.jails

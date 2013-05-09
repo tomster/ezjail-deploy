@@ -152,7 +152,7 @@ class BaseJail(propdict):
 
 class JailSystem(object):
 
-    def __init__(self, **config):
+    def __init__(self, _blueprints=None, **config):
 
         """ config needs to contain at least one entry named 'host' which defines
         the jail host.
@@ -163,8 +163,14 @@ class JailSystem(object):
         self.host = host_factory(**host_config)
         self.jails = OrderedDict()
         for jail_name, jail_config in config.iteritems():
-            if jail_name.startswith('_') or 'blueprint' not in jail_config:
+            if jail_name.startswith('_'):
                 continue
-            jail_factory = instance_from_dotted_name(jail_config['blueprint'])
+            if 'blueprint' not in jail_config and _blueprints is not None:
+                classname = '%sJail' % jail_name.title()
+                jail_factory = getattr(_blueprints, classname)
+            elif 'blueprint' not in jail_config:
+                continue
+            else:
+                jail_factory = instance_from_dotted_name(jail_config['blueprint'])
             self.jails[jail_name] = jail_factory(**jail_config)
             self.jails[jail_name].jailhost = self.host
