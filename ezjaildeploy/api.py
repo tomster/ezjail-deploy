@@ -150,6 +150,9 @@ class BaseJail(propdict):
         NotImplemented
 
 
+classname_from_key = lambda name: '%sJail' % name.title()
+
+
 class JailSystem(object):
 
     def __init__(self, _blueprints=None, **config):
@@ -159,14 +162,19 @@ class JailSystem(object):
         any other entries that don't start with an underscore are treated as jail definitions.
         """
         host_config = config.pop('host', dict())
-        host_factory = instance_from_dotted_name(host_config.get('blueprint', 'ezjaildeploy.api.JailHost'))
+        if 'blueprint' in host_config:
+            host_factory = instance_from_dotted_name(host_config['blueprint'])
+        elif hasattr(_blueprints, 'JailHost'):
+            host_factory = _blueprints.JailHost
+        else:
+            host_factory = JailHost
         self.host = host_factory(**host_config)
         self.jails = OrderedDict()
         for jail_name, jail_config in config.iteritems():
             if jail_name.startswith('_'):
                 continue
             if 'blueprint' not in jail_config and _blueprints is not None:
-                classname = '%sJail' % jail_name.title()
+                classname = classname_from_key(jail_name.title())
                 jail_factory = getattr(_blueprints, classname)
             elif 'blueprint' not in jail_config:
                 continue

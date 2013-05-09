@@ -36,12 +36,20 @@ def test_custom_jailhost(config):
     assert isinstance(instance.host, CryptoJailHost)
 
 
-def test_custom_blueprint_for_jailhost(config):
+def test_custom_blueprint_for_jail(config):
     del config['unbound']['blueprint']
     from ezjaildeploy.examples import blueprints
     config['_blueprints'] = blueprints
     instance = system(config)
     assert isinstance(instance.jails['unbound'], blueprints.UnboundJail)
+
+
+def test_custom_blueprint_for_jailhost(config):
+    from ezjaildeploy.examples import blueprints
+    config['_blueprints'] = blueprints
+    instance = system(config)
+    # assert isinstance(instance.host, CryptoJailHost)
+    assert isinstance(instance.host, blueprints.JailHost)
 
 
 def test_jailinstance(system, config):

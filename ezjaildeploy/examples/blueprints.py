@@ -1,8 +1,8 @@
 from fabric import api as fab
-from ezjaildeploy.api import JailHost, BaseJail
+from ezjaildeploy import api
 
 
-class CryptoJailHost(JailHost):
+class CryptoJailHost(api.JailHost):
 
     """ Installs and configures ezjail to use an encrypted ZFS pool.
     """
@@ -36,7 +36,11 @@ class CryptoJailHost(JailHost):
         fab.sudo("""sudo zfs mount -a""")  # sometimes the newly created pool is not mounted automatically
 
 
-class UnboundJail(BaseJail):
+# alias for providing custom jail host via convention
+JailHost = CryptoJailHost
+
+
+class UnboundJail(api.BaseJail):
 
     """ Configures a simple forwarding, caching nameserver.
     """
