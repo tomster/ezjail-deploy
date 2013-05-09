@@ -8,10 +8,10 @@ from fabric.contrib.project import rsync_project
 from propdict import propdict
 from ezjailremote import fabfile as ezjail
 
-from util import render_site_structure
+from util import render_site_structure, instance_from_dotted_name
 
 
-class JailHost(object):
+class JailHost(propdict):
 
     jailzfs = None
     ip_addr = None
@@ -19,43 +19,6 @@ class JailHost(object):
     sshd_port = '22'
     install_ports = True
     install_from = 'pkg_add'
-
-    def __init__(self, blueprints=None, config=dict()):
-        """ config needs to contain at least one entry named 'host' which defines
-        the jail host.
-        any other entries that don't start with an underscore are treated as jail definitions.
-        """
-        self.config = config
-        for key, value in config.get('host', dict()).items():
-            setattr(self, key, value)
-
-        self.available_blueprints = OrderedDict()
-        for name in dir(blueprints):
-            obj = getattr(blueprints, name)
-            if inspect.isclass(obj) and issubclass(obj, BaseJail):
-                if obj.name:
-                    obj_name = obj.name
-                else:
-                    obj_name = obj.__name__.split('Jail')[0].lower()
-                self.available_blueprints[obj_name] = obj
-
-        self.jails = OrderedDict()
-        for jail_name in set(config.keys()).union(set(self.available_blueprints.keys())):
-            if jail_name.startswith('_') or jail_name == 'host':
-                continue
-            if jail_name in self.available_blueprints:
-                jail_factory = self.available_blueprints[jail_name]
-            else:
-                try:
-                    jail_factory = getattr(blueprints, config['jail_name']['blueprint'])
-                except KeyError:
-                    jail_factory = BaseJail
-            jail_config = config.get(jail_name, dict())
-            if 'name' in jail_config:
-                real_jail_name = jail_config.pop('name')
-            else:
-                real_jail_name = jail_name
-            self.jails[jail_name] = jail_factory(jailhost=self, name=real_jail_name, **jail_config)
 
     def bootstrap(self):
         # run ezjailremote's basic bootstrap
@@ -189,3 +152,20 @@ class BaseJail(propdict):
 
     def update(self):
         NotImplemented
+
+
+class JailSystem(object):
+
+    def __init__(self, **config):
+
+        """ config needs to contain at least one entry named 'host' which defines
+        the jail host.
+        any other entries that don't start with an underscore are treated as jail definitions.
+        """
+        self.host = JailHost(**config.pop('host', dict()))
+        self.jails = OrderedDict()
+        for jail_name, jail_config in config.iteritems():
+            if jail_name.startswith('_'):
+                continue
+            jail_factory = instance_from_dotted_name(jail_config['blueprint'])
+            self.jails[jail_name] = jail_factory(**jail_config)
