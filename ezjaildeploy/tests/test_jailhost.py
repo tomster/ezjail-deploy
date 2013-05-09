@@ -22,7 +22,7 @@ def system(config):
     return JailSystem(**config)
 
 
-def test_jailhost(system):
+def test_jailhost(system, config):
     assert isinstance(system.host, JailHost)
     assert system.host.ip_addr == config['host']['ip_addr']
 
