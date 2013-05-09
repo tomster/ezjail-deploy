@@ -143,10 +143,10 @@ class BaseJail(propdict):
         """
         return fab.sudo("""ezjail-admin console -e "%s" %s""" % (command, self.name))
 
-    def configure(self):
+    def configure(self):  # pragma: no cover
         NotImplemented
 
-    def update(self):
+    def update(self):  # pragma: no cover
         NotImplemented
 
 
