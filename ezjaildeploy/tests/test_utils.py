@@ -13,7 +13,7 @@ def pytest_funcarg__examples(request):
         fs_tempdir = mkdtemp()
         return (fs_tempdir,
             path.abspath(path.join(path.dirname(ezjaildeploy.__file__),
-                '../examples')))
+                'examples')))
 
     def teardown(examples):
         fs_tempdir, fs_examples = examples
