@@ -30,21 +30,21 @@ class DummyJail(BaseJail):
         return '%s/16 allow' % self.ip_addr
 
 
-def  test_tempdir_created(examples):
+def test_tempdir_created(examples):
     target_dir, fs_examples = examples
     fs_rendered = render_site_structure(path.join(fs_examples, 'unbound'),
         dict(ip_addr='192.168.0.1', access_control='10.0.1.0/16 allow'), target_dir)
     assert fs_rendered != path.join(fs_examples, 'unbound')
 
 
-def  test_subdirectories_created(examples):
+def test_subdirectories_created(examples):
     target_dir, fs_examples = examples
     fs_rendered = render_site_structure(path.join(fs_examples, 'unbound'),
         dict(ip_addr='192.168.0.1', access_control='10.0.1.0/16 allow'), target_dir)
     assert path.exists('%s/%s' % (fs_rendered, '/usr/local/etc'))
 
 
-def  test_string_replacement(examples):
+def test_string_replacement(examples):
     target_dir, fs_examples = examples
     fs_rendered = render_site_structure(path.join(fs_examples, 'unbound'),
         dict(ip_addr='192.168.0.1', access_control='10.0.1.0/16 allow'), target_dir)
@@ -52,7 +52,7 @@ def  test_string_replacement(examples):
     assert ('interface: 192.168.0.1' in open(fs_unbound_conf).read())
 
 
-def  test_computed_string_replacement(examples):
+def test_computed_string_replacement(examples):
     """a jail instance can provide additional values computed from
     configuration values."""
     target_dir, fs_examples = examples
