@@ -94,3 +94,9 @@ def test_render_missing_key(examples):
                 'unbound/usr/local/etc/unbound/unbound.conf.tmpl'),
             target_dir,
             dict())
+
+
+def test_instance_from_dotted_name():
+    from ezjaildeploy.examples.blueprints import UnboundJail
+    from ezjaildeploy.util import instance_from_dotted_name
+    assert instance_from_dotted_name('ezjaildeploy.examples.blueprints.UnboundJail') is UnboundJail

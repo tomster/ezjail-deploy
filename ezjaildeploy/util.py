@@ -37,3 +37,10 @@ def render_template(fs_source, fs_target_dir, context):
     else:
         copy2(fs_source, path.join(fs_target_dir, filename))
     return path.join(fs_target_dir, filename)
+
+
+def instance_from_dotted_name(name):
+    parts = name.split('.')
+    module_name = '.'.join(parts[:-1])
+    target = parts[-1]
+    return getattr(__import__(module_name, fromlist=[target]), target)
