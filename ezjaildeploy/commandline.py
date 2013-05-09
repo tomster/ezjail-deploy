@@ -30,20 +30,8 @@ import sys
 from docopt import docopt
 from fabric import api as fab
 from os import path
-import ConfigParser as ConfigParser_
-
-
-class ConfigParser(ConfigParser_.SafeConfigParser):
-    """ a ConfigParser that can provide its values as simple dictionary.
-    taken from http://stackoverflow.com/questions/3220670
-    """
-
-    def as_dict(self):
-        d = dict(self._sections)
-        for k in d:
-            d[k] = dict(self._defaults, **d[k])
-            d[k].pop('__name__', None)
-        return d
+from ezjaildeploy.util import get_config
+from ezjaildeploy.api import JailSystem
 
 
 def main(blueprints=None):
@@ -52,16 +40,7 @@ def main(blueprints=None):
 
     # parse the configuration
     fs_config = arguments['--config']
-    config = dict()
-    if path.exists(fs_config):
-        parser = ConfigParser(allow_no_value=True)
-        parser.read(fs_config)
-        parsed_dict = parser.as_dict()
-        for key in parsed_dict.keys():
-            if key in config:
-                config[key].update(parsed_dict.get(key, dict()))
-            else:
-                config[key] = parsed_dict[key]
+    config = get_config(fs_config)
 
     # instantiate host and jails
     if blueprints is None:

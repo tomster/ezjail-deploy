@@ -6,11 +6,16 @@ from ezjaildeploy.util import render_site_structure, render_template
 
 
 @fixture
-def examples(request, tmpdir):
+def fs_examples():
     import ezjaildeploy
+    return path.abspath(path.join(path.dirname(ezjaildeploy.__file__),
+            'examples'))
+
+
+@fixture
+def examples(request, tmpdir, fs_examples):
     return (str(tmpdir),
-        path.abspath(path.join(path.dirname(ezjaildeploy.__file__),
-            'examples')))
+        fs_examples)
 
 
 class DummyJail(BaseJail):
@@ -90,3 +95,9 @@ def test_instance_from_dotted_name():
     from ezjaildeploy.examples.blueprints import UnboundJail
     from ezjaildeploy.util import instance_from_dotted_name
     assert instance_from_dotted_name('ezjaildeploy.examples.blueprints.UnboundJail') is UnboundJail
+
+
+def test_dict_parser(fs_examples):
+    from ezjaildeploy.util import get_config
+    parsed_dict = get_config(path.join(fs_examples, 'jails.conf.sample'))
+    assert parsed_dict['host']['ip_addr'] == '192.168.91.128'
