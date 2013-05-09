@@ -163,7 +163,7 @@ class JailSystem(object):
         self.host = host_factory(**host_config)
         self.jails = OrderedDict()
         for jail_name, jail_config in config.iteritems():
-            if jail_name.startswith('_'):
+            if jail_name.startswith('_') or 'blueprint' not in jail_config:
                 continue
             jail_factory = instance_from_dotted_name(jail_config['blueprint'])
             self.jails[jail_name] = jail_factory(**jail_config)

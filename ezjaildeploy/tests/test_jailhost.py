@@ -14,6 +14,12 @@ def config():
             'blueprint': 'ezjaildeploy.examples.blueprints.UnboundJail',
             'ip_addr': '10.0.1.2'
         },
+        '_not_a_jail': {
+            'foo': 23
+        },
+        'also_not_a_jail': {
+            'bar': 'baz',
+        }
     }
 
 
@@ -56,3 +62,11 @@ def test_jailinstance_overrid_remote_root(config):
     config['unbound']['fs_remote_root'] = 'foo'
     instance = system(config)
     assert instance.jails['unbound'].fs_remote_root == config['unbound']['fs_remote_root']
+
+
+def test_underscore_skipped_as_jail(system):
+    assert '_not_a_jail' not in system.jails
+
+
+def test_jail_entry_without_blueprint_skipped(system):
+    assert 'also_not_a_jail' not in system.jails
