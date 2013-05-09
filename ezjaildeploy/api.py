@@ -27,9 +27,6 @@ class JailHost(object):
         self.config = config
         for key, value in config.get('host', dict()).items():
             setattr(self, key, value)
-        if blueprints is None:
-            from ezjailremote import api  # use examples instead
-            blueprints = api
 
         self.available_blueprints = OrderedDict()
         for name in dir(blueprints):
