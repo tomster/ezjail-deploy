@@ -48,7 +48,7 @@ def test_jailinstance_default(system):
     assert system.jails['unbound'].ports_to_install == ['dns/unbound']
 
 
-def test_jailinstance_overridedefault(config):
+def test_jailinstance_override_default(config):
     config['unbound']['ports_to_install'] = ['foo']
     instance = system(config)
     assert instance.jails['unbound'].ports_to_install == config['unbound']['ports_to_install']
@@ -58,7 +58,7 @@ def test_jailinstance_default_remote_root(system):
     assert system.jails['unbound'].fs_remote_root == '/usr/jails/unbound'
 
 
-def test_jailinstance_overrid_remote_root(config):
+def test_jailinstance_override_remote_root(config):
     config['unbound']['fs_remote_root'] = 'foo'
     instance = system(config)
     assert instance.jails['unbound'].fs_remote_root == config['unbound']['fs_remote_root']
