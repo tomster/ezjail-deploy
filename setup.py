@@ -31,7 +31,7 @@ setup(name='ezjaildeploy',
         # -*- Extra requirements: -*-
     ],
     extras_require={
-        'tests': ['unittest2', 'pytest']
+        'tests': ['unittest2', 'pytest', 'mock']
     },
     entry_points="""
     # -*- Entry points: -*-
