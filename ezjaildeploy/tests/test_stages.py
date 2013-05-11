@@ -1,5 +1,7 @@
+from collections import OrderedDict
 from mock import MagicMock
 from pytest import fixture
+from ezjaildeploy.api import BaseJail
 from ezjaildeploy.stages import NameDescription, Step, Stage
 
 
@@ -62,12 +64,54 @@ def test_step_uses_args(bootstrap_command):
     bootstrap_command.assert_called_once_with('foo', True, blub=23)
 
 
-def test_assemble_stage_from_steps(bootstrap_command, configure_command):
-    stage = Stage(name='bootstrap',
+@fixture
+def bootstrap_stage(bootstrap_command, configure_command):
+    return Stage(name='bootstrap',
         steps=[
             Step(name='install', command=bootstrap_command, args=['foo', True], kwargs=dict(blub=23)),
             Step(name='configure', command=configure_command),
         ])
-    stage()
+
+
+def test_assemble_stage_from_steps(bootstrap_stage, bootstrap_command, configure_command):
+    bootstrap_stage()
     bootstrap_command.assert_called_once_with('foo', True, blub=23)
     configure_command.assert_called_once_with()
+
+
+@fixture
+def update_command():
+    return MagicMock()
+
+
+@fixture
+def jail(bootstrap_stage, update_command):
+
+    class DummyJail(BaseJail):
+
+        stages = OrderedDict(
+            bootstrap=bootstrap_stage,
+            update=Step(name='update', command=update_command, kwargs=dict(backup_data=True))
+        )
+
+    return DummyJail(ip_addr='127.0.0.1')
+
+
+def test_assemble_jail_from_stages(jail):
+    assert jail.name == 'dummy'
+    assert jail.stages.keys() == ['bootstrap', 'update']
+
+
+def test_init_jail_stages(jail, bootstrap_stage, bootstrap_command, configure_command, update_command):
+    jail.init()
+    bootstrap_command.assert_called_once_with('foo', True, blub=23)
+    configure_command.assert_called_once_with()
+    update_command.assert_called_once_with(backup_data=True)
+
+
+def test_execute_single_stage(jail, bootstrap_stage, bootstrap_command, configure_command, update_command):
+    assert not update_command.called
+    jail.execute(stage='bootstrap')
+    bootstrap_command.assert_called_once_with('foo', True, blub=23)
+    configure_command.assert_called_once_with()
+    assert not update_command.called

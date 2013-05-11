@@ -71,6 +71,8 @@ class BaseJail(propdict):
     ports_to_install = []
     jailhost = None
 
+    stages = OrderedDict()
+
     def __init__(self, **config):
         """
         Instantiate it with arbitrary parameters, but the following are mandatory:
@@ -101,15 +103,12 @@ class BaseJail(propdict):
             self.fs_remote_root = '/usr/jails/%s' % self.name
 
     def init(self):
-        """ create the jail from scratch """
-        self.jailhost._snapshot(name='%s-pre-init' % self.name)
-        self._create()
-        self._upload()
-        self._prepare()
-        self.configure()
-        self.preparehasrun = True
-        self.update()
-        self.jailhost._snapshot(name='%s-post-init' % self.name)
+        """ create the jail from scratch by executing all stages in order"""
+        for stage in self.stages.itervalues():
+            stage()
+
+    def execute(self, stage):
+        self.stages[stage]()
 
     def _create(self):
         """ create the jail instance """
