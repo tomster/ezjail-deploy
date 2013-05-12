@@ -111,7 +111,14 @@ def test_init_jail_stages(jail, bootstrap_stage, bootstrap_command, configure_co
 
 def test_execute_single_stage(jail, bootstrap_stage, bootstrap_command, configure_command, update_command):
     assert not update_command.called
-    jail.execute(stage='bootstrap')
-    bootstrap_command.assert_called_once_with('foo', True, blub=23)
-    configure_command.assert_called_once_with()
+    jail.execute_stage(name='bootstrap')
+    assert bootstrap_command.called
+    assert configure_command.called
     assert not update_command.called
+
+
+def test_executing_second_stage_also_executes_first(jail, bootstrap_stage, bootstrap_command, configure_command, update_command):
+    jail.execute_stage(name='update')
+    assert bootstrap_command.called
+    assert configure_command.called
+    assert update_command.called

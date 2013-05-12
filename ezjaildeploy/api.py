@@ -107,8 +107,11 @@ class BaseJail(propdict):
         for stage in self.stages.itervalues():
             stage()
 
-    def execute(self, stage):
-        self.stages[stage]()
+    def execute_stage(self, name):
+        for this_name, stage in self.stages.iteritems():
+            stage()
+            if this_name == name:
+                break
 
     def _create(self):
         """ create the jail instance """
