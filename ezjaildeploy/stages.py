@@ -22,6 +22,7 @@ class NameDescription(object):
 class Step(NameDescription):
 
     command = None
+    __stage__ = None
 
     def __init__(self, command, name=None, description=None, args=[], kwargs=dict()):
         if name is None:
@@ -48,6 +49,7 @@ class Stage(NameDescription):
         super(Stage, self).__init__(name, description)
         for step in steps:
             self.steps[step.name] = step
+            self.steps[step.name].__stage__ = self
 
     def __call__(self):
         if self.has_run():
