@@ -134,6 +134,10 @@ def test_skip_completed_stages(jail, bootstrap_stage, bootstrap_command, configu
         assert update_command.called
 
 
+def test_stages_have_their_own_steps(jail):
+    assert not jail.stages['bootstrap'].steps is jail.stages['update'].steps
+
+
 def test_stage_references_its_jail(jail):
     assert jail.stages['update'].__jail__ is jail
 

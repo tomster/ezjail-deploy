@@ -42,11 +42,13 @@ class Step(NameDescription):
 
 class Stage(NameDescription):
 
-    steps = OrderedDict()
     __jail__ = None
+    steps = None
 
     def __init__(self, steps, name=None, description=None):
         super(Stage, self).__init__(name, description)
+        if self.steps is None:
+            self.steps = OrderedDict()
         for step in steps:
             self.steps[step.name] = step
             self.steps[step.name].__stage__ = self

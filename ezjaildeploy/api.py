@@ -70,8 +70,7 @@ class BaseJail(propdict):
     preparehasrun = False
     ports_to_install = []
     jailhost = None
-
-    stages = OrderedDict()
+    stages = None
 
     def __init__(self, **config):
         """
@@ -102,6 +101,8 @@ class BaseJail(propdict):
         if self.fs_remote_root is None:
             self.fs_remote_root = '/usr/jails/%s' % self.name
 
+        if self.stages is None:
+            self.stages = OrderedDict()
         for stage in self.stages.itervalues():
             stage.__jail__ = self
 
