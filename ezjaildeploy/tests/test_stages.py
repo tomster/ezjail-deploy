@@ -92,10 +92,9 @@ def jail(bootstrap_stage, update_command):
         stages = OrderedDict(
             bootstrap=bootstrap_stage,
             update=Stage(name='update',
-                steps=[Step(name='update', command=update_command, kwargs=dict(backup_data=True))]
+                steps=[Step(name='verify', command=update_command, kwargs=dict(backup_data=True))]
             )
         )
-
     return DummyJail(ip_addr='127.0.0.1')
 
 
@@ -143,4 +142,5 @@ def test_stage_references_its_jail(jail):
 
 
 def test_step_references_its_stage(jail):
-    assert jail.stages['update'].steps['update'].__stage__ is jail.stages['update']
+    assert jail.stages['bootstrap'].steps['install'].__stage__ is jail.stages['bootstrap']
+    assert jail.stages['update'].steps['verify'].__stage__ is jail.stages['update']
