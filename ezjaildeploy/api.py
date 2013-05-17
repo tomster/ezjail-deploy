@@ -104,8 +104,7 @@ class BaseJail(propdict):
 
     def init(self):
         """ create the jail from scratch by executing all stages in order"""
-        for stage in self.stages.itervalues():
-            stage()
+        self.execute_stage(self.stages.keys()[-1])
 
     def execute_stage(self, name):
         for this_name, stage in self.stages.iteritems():
