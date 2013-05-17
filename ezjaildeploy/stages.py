@@ -14,6 +14,10 @@ class NameDescription(object):
         else:
             self.description = description
 
+    def has_run(self):
+        """ check for existence of ZFS snapsshot on host system """
+        return False
+
 
 class Step(NameDescription):
 
@@ -41,5 +45,7 @@ class Stage(NameDescription):
             self.steps[step.name] = step
 
     def __call__(self):
+        if self.has_run():
+            return
         for step in self.steps.itervalues():
             step()

@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from mock import MagicMock
+from mock import MagicMock, patch
 from pytest import fixture
 from ezjaildeploy.api import BaseJail
 from ezjaildeploy.stages import NameDescription, Step, Stage
@@ -122,3 +122,11 @@ def test_executing_second_stage_also_executes_first(jail, bootstrap_stage, boots
     assert bootstrap_command.called
     assert configure_command.called
     assert update_command.called
+
+
+def test_skip_completed_stages(jail, bootstrap_stage, bootstrap_command, configure_command, update_command):
+    with patch.object(bootstrap_stage, 'has_run', lambda: True):
+        jail.execute_stage(name='update')
+        assert not bootstrap_command.called
+        assert not configure_command.called
+        assert update_command.called
