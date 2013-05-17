@@ -35,13 +35,45 @@ def test_stage_docstring_description(name_description):
 
 
 @fixture
-def bootstrap_command():
+def mocked_step_bootstrap():
     return MagicMock()
 
 
 @fixture
-def configure_command():
+def mocked_step_configure():
     return MagicMock()
+
+
+@fixture
+def mocked_step_update():
+    return MagicMock()
+
+
+@fixture
+def mocked_stage_bootstrap(mocked_step_bootstrap, mocked_step_configure):
+    return Stage(name='bootstrap',
+        steps=[
+            Step(name='install',
+                command=mocked_step_bootstrap,
+                args=['foo', True], kwargs=dict(blub=23)),
+            Step(name='configure', command=mocked_step_configure),
+        ])
+
+
+@fixture
+def jail(mocked_stage_bootstrap, mocked_step_update):
+
+    class DummyJail(BaseJail):
+
+        stages = OrderedDict(
+            bootstrap=mocked_stage_bootstrap,
+            update=Stage(name='update',
+                steps=[Step(name='verify',
+                    command=mocked_step_update,
+                    kwargs=dict(backup_data=True))]
+            )
+        )
+    return DummyJail(ip_addr='127.0.0.1')
 
 
 def real_command(foo='bar', baz=False):
@@ -58,44 +90,16 @@ def test_step_name_defaults_to_command_name():
     assert step.name == 'real_command'
 
 
-def test_step_uses_args(bootstrap_command):
-    step = Step(command=bootstrap_command, args=['foo', True], kwargs=dict(blub=23))
+def test_step_uses_args(mocked_step_bootstrap):
+    step = Step(command=mocked_step_bootstrap, args=['foo', True], kwargs=dict(blub=23))
     step()
-    bootstrap_command.assert_called_once_with('foo', True, blub=23)
+    mocked_step_bootstrap.assert_called_once_with('foo', True, blub=23)
 
 
-@fixture
-def bootstrap_stage(bootstrap_command, configure_command):
-    return Stage(name='bootstrap',
-        steps=[
-            Step(name='install', command=bootstrap_command, args=['foo', True], kwargs=dict(blub=23)),
-            Step(name='configure', command=configure_command),
-        ])
-
-
-def test_assemble_stage_from_steps(bootstrap_stage, bootstrap_command, configure_command):
-    bootstrap_stage()
-    bootstrap_command.assert_called_once_with('foo', True, blub=23)
-    configure_command.assert_called_once_with()
-
-
-@fixture
-def update_command():
-    return MagicMock()
-
-
-@fixture
-def jail(bootstrap_stage, update_command):
-
-    class DummyJail(BaseJail):
-
-        stages = OrderedDict(
-            bootstrap=bootstrap_stage,
-            update=Stage(name='update',
-                steps=[Step(name='verify', command=update_command, kwargs=dict(backup_data=True))]
-            )
-        )
-    return DummyJail(ip_addr='127.0.0.1')
+def test_assemble_stage_from_steps(mocked_stage_bootstrap, mocked_step_bootstrap, mocked_step_configure):
+    mocked_stage_bootstrap()
+    mocked_step_bootstrap.assert_called_once_with('foo', True, blub=23)
+    mocked_step_configure.assert_called_once_with()
 
 
 def test_assemble_jail_from_stages(jail):
@@ -103,34 +107,34 @@ def test_assemble_jail_from_stages(jail):
     assert jail.stages.keys() == ['bootstrap', 'update']
 
 
-def test_init_jail_stages(jail, bootstrap_stage, bootstrap_command, configure_command, update_command):
+def test_init_jail_stages(jail, mocked_stage_bootstrap, mocked_step_bootstrap, mocked_step_configure, mocked_step_update):
     jail.init()
-    bootstrap_command.assert_called_once_with('foo', True, blub=23)
-    configure_command.assert_called_once_with()
-    update_command.assert_called_once_with(backup_data=True)
+    mocked_step_bootstrap.assert_called_once_with('foo', True, blub=23)
+    mocked_step_configure.assert_called_once_with()
+    mocked_step_update.assert_called_once_with(backup_data=True)
 
 
-def test_execute_single_stage(jail, bootstrap_stage, bootstrap_command, configure_command, update_command):
-    assert not update_command.called
+def test_execute_single_stage(jail, mocked_stage_bootstrap, mocked_step_bootstrap, mocked_step_configure, mocked_step_update):
+    assert not mocked_step_update.called
     jail.execute_stage(name='bootstrap')
-    assert bootstrap_command.called
-    assert configure_command.called
-    assert not update_command.called
+    assert mocked_step_bootstrap.called
+    assert mocked_step_configure.called
+    assert not mocked_step_update.called
 
 
-def test_executing_second_stage_also_executes_first(jail, bootstrap_stage, bootstrap_command, configure_command, update_command):
+def test_executing_second_stage_also_executes_first(jail, mocked_stage_bootstrap, mocked_step_bootstrap, mocked_step_configure, mocked_step_update):
     jail.execute_stage(name='update')
-    assert bootstrap_command.called
-    assert configure_command.called
-    assert update_command.called
+    assert mocked_step_bootstrap.called
+    assert mocked_step_configure.called
+    assert mocked_step_update.called
 
 
-def test_skip_completed_stages(jail, update_command, bootstrap_command, configure_command):
+def test_skip_completed_stages(jail, mocked_step_update, mocked_step_bootstrap, mocked_step_configure):
     with patch.object(jail.stages['bootstrap'], 'has_run', lambda: True):
         jail.execute_stage(name='update')
-        assert not bootstrap_command.called
-        assert not configure_command.called
-        assert update_command.called
+        assert not mocked_step_bootstrap.called
+        assert not mocked_step_configure.called
+        assert mocked_step_update.called
 
 
 def test_stages_have_their_own_steps(jail):
