@@ -125,8 +125,8 @@ def test_executing_second_stage_also_executes_first(jail, bootstrap_stage, boots
     assert update_command.called
 
 
-def test_skip_completed_stages(jail, bootstrap_stage, bootstrap_command, configure_command, update_command):
-    with patch.object(bootstrap_stage, 'has_run', lambda: True):
+def test_skip_completed_stages(jail, update_command, bootstrap_command, configure_command):
+    with patch.object(jail.stages['bootstrap'], 'has_run', lambda: True):
         jail.execute_stage(name='update')
         assert not bootstrap_command.called
         assert not configure_command.called
