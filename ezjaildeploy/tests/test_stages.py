@@ -47,6 +47,16 @@ def jail(mocked_stage_bootstrap, mocked_step_update):
     return DummyJail(ip_addr='127.0.0.1')
 
 
+@fixture
+def stage(jail):
+    return jail.stages['update']
+
+
+@fixture
+def step(stage):
+    return stage.steps['verify']
+
+
 def real_command(foo='bar', baz=False):
     pass
 
@@ -126,3 +136,11 @@ def test_marking_as_completed_sets_has_run(jail):
     assert not stage.has_run()
     stage._mark_as_completed()
     assert stage.has_run()
+
+
+def test_stage_snapshot_name(stage):
+    assert stage._snapshot_name == '002-update'
+
+
+def test_step_snapshot_name(step):
+    assert step._snapshot_name == '002-update-001-verify'

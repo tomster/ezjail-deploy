@@ -43,7 +43,8 @@ class Step(NameDescription):
 
     @property
     def _snapshot_name(self):
-        return ''
+        step_index = self.__stage__.steps.keys().index(self.name) + 1
+        return '{0}-{1:03}-{2}'.format(self.__stage__._snapshot_name, step_index, self.name)
 
 
 class Stage(NameDescription):
@@ -64,3 +65,7 @@ class Stage(NameDescription):
             if not step.has_run():
                 step()
         self._mark_as_completed()
+
+    @property
+    def _snapshot_name(self):
+        return '{0:03}-{1}'.format(self.__jail__.stages.keys().index(self.name) + 1, self.name)
