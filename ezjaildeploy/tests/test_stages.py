@@ -144,3 +144,10 @@ def test_stage_references_its_jail(jail):
 def test_step_references_its_stage(jail):
     assert jail.stages['bootstrap'].steps['install'].__stage__ is jail.stages['bootstrap']
     assert jail.stages['update'].steps['verify'].__stage__ is jail.stages['update']
+
+
+def test_marking_as_completed_sets_has_run(jail):
+    stage = jail.stages['bootstrap']
+    assert not stage.has_run()
+    stage._mark_as_completed()
+    assert stage.has_run()

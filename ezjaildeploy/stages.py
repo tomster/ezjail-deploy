@@ -15,9 +15,13 @@ class NameDescription(object):
         else:
             self.description = description
 
+    def _mark_as_completed(self):
+        """ create ZFS snapsshot on host"""
+        self._has_run = True
+
     def has_run(self):
         """ check for existence of ZFS snapsshot on host system """
-        return False
+        return self._has_run
 
 
 class Step(NameDescription):
@@ -35,6 +39,7 @@ class Step(NameDescription):
 
     def __call__(self):
         self.command(*self.args, **self.kwargs)
+        self._mark_as_completed()
 
     @property
     def _snapshot_name(self):
