@@ -5,6 +5,7 @@ class NameDescription(object):
 
     name = u''
     description = u''
+    _has_run = False
 
     def __init__(self, name=None, description=None):
         if name is not None:
@@ -54,7 +55,7 @@ class Stage(NameDescription):
             self.steps[step.name].__stage__ = self
 
     def __call__(self):
-        if self.has_run():
-            return
         for step in self.steps.itervalues():
-            step()
+            if not step.has_run():
+                step()
+        self._mark_as_completed()

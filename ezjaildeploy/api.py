@@ -112,7 +112,8 @@ class BaseJail(propdict):
 
     def execute_stage(self, name):
         for this_name, stage in self.stages.iteritems():
-            stage()
+            if not stage.has_run():
+                stage()
             if this_name == name:
                 break
 
