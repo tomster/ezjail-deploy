@@ -102,6 +102,9 @@ class BaseJail(propdict):
         if self.fs_remote_root is None:
             self.fs_remote_root = '/usr/jails/%s' % self.name
 
+        for stage in self.stages.itervalues():
+            stage.__jail__ = self
+
     def init(self):
         """ create the jail from scratch by executing all stages in order"""
         self.execute_stage(self.stages.keys()[-1])

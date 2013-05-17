@@ -34,10 +34,15 @@ class Step(NameDescription):
     def __call__(self):
         self.command(*self.args, **self.kwargs)
 
+    @property
+    def _snapshot_name(self):
+        return ''
+
 
 class Stage(NameDescription):
 
     steps = OrderedDict()
+    __jail__ = None
 
     def __init__(self, steps, name=None, description=None):
         super(Stage, self).__init__(name, description)
