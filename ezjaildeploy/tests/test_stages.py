@@ -31,47 +31,21 @@ def mocked_stage_bootstrap(mocked_step_bootstrap, mocked_step_configure):
         ])
 
 
-class DummyJail(BaseJail):
-
-    stages = OrderedDict(
-        bootstrap=mocked_stage_bootstrap,
-        update=Stage(name='update',
-            steps=[Step(name='verify',
-                command=mocked_step_update,
-                kwargs=dict(backup_data=True))]
-        )
-    )
-
-
 @fixture
 def jail(mocked_stage_bootstrap, mocked_step_update):
 
-    return DummyJail(ip_addr='127.0.0.1')
+    class DummyJail(BaseJail):
 
-
-class CustomOrderSubclassedJail(DummyJail):
-
-    ''' contains a custom stage ``prepare`` that is
-    executed after the super classes' ``bootstrap``
-    stage but before ``update``.'''
-
-    @property
-    def stages(self):
-        super_stages = super(CustomOrderSubclassedJail, self).stages
-        return OrderedDict([
-            ('bootstrap', super_stages['bootstrap']),
-            ('prepare', Stage(name='prepare',
-                steps=[Step(name='checkout',
-                    command=None)]
-            )),
-            ('update', super_stages['update'])
-            ]
+        stages = OrderedDict(
+            bootstrap=mocked_stage_bootstrap,
+            update=Stage(name='update',
+                steps=[Step(name='verify',
+                    command=mocked_step_update,
+                    kwargs=dict(backup_data=True))]
+            )
         )
 
-
-@fixture
-def custom_order_subclassed_jail():
-    return CustomOrderSubclassedJail(ip_addr='127.0.0.1')
+    return DummyJail(ip_addr='127.0.0.1')
 
 
 @fixture
@@ -171,7 +145,3 @@ def test_stage_snapshot_name(stage):
 
 def test_step_snapshot_name(step):
     assert step._snapshot_name == '002-update-001-verify'
-
-
-def test_subclassed_stages_order(custom_order_subclassed_jail):
-    assert custom_order_subclassed_jail.stages.keys() == ['bootstrap', 'prepare', 'update']
