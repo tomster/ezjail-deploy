@@ -26,19 +26,23 @@ class NameDescription(object):
 
 class Step(NameDescription):
 
-    command = None
     __stage__ = None
 
-    def __init__(self, command, name=None, description=None, args=[], kwargs=dict()):
-        if name is None:
+    def command(self):
+        raise NotImplemented
+
+    def __init__(self, command=None, name=None, description=None, **kwargs):
+        if name is None and command is not None:
             name = command.func_name
+        elif command is None:
+            name = self.__class__.__name__
         super(Step, self).__init__(name, description)
-        self.command = command
-        self.args = args
+        if command is not None:
+            self.command = command
         self.kwargs = kwargs
 
     def __call__(self):
-        self.command(*self.args, **self.kwargs)
+        self.command(**self.kwargs)
         self._mark_as_completed()
 
     @property

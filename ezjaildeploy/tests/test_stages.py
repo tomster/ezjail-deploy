@@ -26,7 +26,7 @@ def mocked_stage_bootstrap(mocked_step_bootstrap, mocked_step_configure):
         steps=[
             Step(name='install',
                 command=mocked_step_bootstrap,
-                args=['foo', True], kwargs=dict(blub=23)),
+                blub=23),
             Step(name='configure', command=mocked_step_configure),
         ])
 
@@ -41,7 +41,7 @@ def jail(mocked_stage_bootstrap, mocked_step_update):
             update=Stage(name='update',
                 steps=[Step(name='verify',
                     command=mocked_step_update,
-                    kwargs=dict(backup_data=True))]
+                    backup_data=True)]
             )
         )
 
@@ -72,15 +72,15 @@ def test_step_name_defaults_to_command_name():
     assert step.name == 'real_command'
 
 
-def test_step_uses_args(mocked_step_bootstrap):
-    step = Step(command=mocked_step_bootstrap, args=['foo', True], kwargs=dict(blub=23))
+def test_step_uses_kwargs(mocked_step_bootstrap):
+    step = Step(command=mocked_step_bootstrap, blub=23)
     step()
-    mocked_step_bootstrap.assert_called_once_with('foo', True, blub=23)
+    mocked_step_bootstrap.assert_called_once_with(blub=23)
 
 
 def test_assemble_stage_from_steps(mocked_stage_bootstrap, mocked_step_bootstrap, mocked_step_configure):
     mocked_stage_bootstrap()
-    mocked_step_bootstrap.assert_called_once_with('foo', True, blub=23)
+    mocked_step_bootstrap.assert_called_once_with(blub=23)
     mocked_step_configure.assert_called_once_with()
 
 
@@ -91,7 +91,7 @@ def test_assemble_jail_from_stages(jail):
 
 def test_init_jail_stages(jail, mocked_stage_bootstrap, mocked_step_bootstrap, mocked_step_configure, mocked_step_update):
     jail.init()
-    mocked_step_bootstrap.assert_called_once_with('foo', True, blub=23)
+    mocked_step_bootstrap.assert_called_once_with(blub=23)
     mocked_step_configure.assert_called_once_with()
     mocked_step_update.assert_called_once_with(backup_data=True)
 
