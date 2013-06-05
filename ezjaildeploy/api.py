@@ -1,6 +1,5 @@
 import inspect
 from os import path
-from datetime import datetime
 from shutil import rmtree
 from collections import OrderedDict
 from fabric import api as fab
@@ -9,6 +8,7 @@ from propdict import propdict
 from ezjailremote import fabfile as ezjail
 
 from util import render_site_structure, instance_from_dotted_name
+from zfs import snapshot
 
 
 class JailHost(propdict):
@@ -24,27 +24,11 @@ class JailHost(propdict):
         # run ezjailremote's basic bootstrap
         ezjail.bootstrap(primary_ip=self.ip_addr)
         fab.sudo('pkg_add -r rsync')
-        self._snapshot(name='bootstrap-run')
+        snapshot(host=self, name='bootstrap-run')
 
     def install(self):
         ezjail.install(source=self.install_from, jailzfs=self.jailzfs, p=self.install_ports)
-        self._snapshot(name='install-run')
-
-    def _snapshot(self, name, jail=None):
-        """ create a ZFS snapshot of the given jail, or, if None given from the jailhost.
-
-        The name of the snapshot will have an iso format timestamp appended."""
-
-        if self.jailzfs is None:
-            return
-
-        if jail is None:
-            zfs_fs = self.jailzfs
-        else:
-            zfs_fs = '%s/%s' % (self.jailzfs, jail)
-
-        snapshot_name = '%s@%s-%s' % (zfs_fs, datetime.now().isoformat(), name)
-        fab.sudo("""zfs snapshot %s""" % snapshot_name)
+        snapshot(host=self, name='install-run')
 
 
 class BaseJail(propdict):
