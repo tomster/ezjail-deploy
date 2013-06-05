@@ -1,49 +1,28 @@
-from collections import OrderedDict
+from operator import attrgetter
 
 
-class NameDescription(object):
-
-    name = u''
-    description = u''
-    _has_run = False
-
-    def __init__(self, name=None, description=None):
-        if name is not None:
-            self.name = name
-        if description is None:
-            self.description = self.__doc__
-        else:
-            self.description = description
-
-    def _mark_as_completed(self):
-        """ create ZFS snapsshot on host"""
-        self._has_run = True
-
-    def has_run(self):
-        """ check for existence of ZFS snapsshot on host system """
-        return self._has_run
+def counter():
+    count = 0
+    while True:
+        yield count
+        count += 1
 
 
-class Step(NameDescription):
+class Step(object):
 
     __stage__ = None
 
-    def command(self):
-        raise NotImplemented
-
-    def __init__(self, command=None, name=None, description=None, **kwargs):
-        if name is None and command is not None:
-            name = command.func_name
-        elif command is None:
-            name = self.__class__.__name__
-        super(Step, self).__init__(name, description)
-        if command is not None:
-            self.command = command
+    def __init__(self, **kwargs):
+        self.name = None
+        self.id = counter()
         self.kwargs = kwargs
 
+    def command(self, **kwargs):
+        NotImplemented
+
     def __call__(self):
-        self.command(**self.kwargs)
-        self._mark_as_completed()
+        result = self.command(**self.kwargs)
+        return result
 
     @property
     def _snapshot_name(self):
@@ -51,24 +30,47 @@ class Step(NameDescription):
         return '{0}-{1:03}-{2}'.format(self.__stage__._snapshot_name, step_index, self.name)
 
 
-class Stage(NameDescription):
+class DecoratorStep(Step):
 
-    __jail__ = None
-    steps = None
-
-    def __init__(self, steps, name=None, description=None):
-        super(Stage, self).__init__(name, description)
-        if self.steps is None:
-            self.steps = OrderedDict()
-        for step in steps:
-            self.steps[step.name] = step
-            self.steps[step.name].__stage__ = self
+    def __init__(self, name, func):
+        super(DecoratorStep, self).__init__()
+        self.name = name
+        self.command = func
 
     def __call__(self):
-        for step in self.steps.itervalues():
-            if not step.has_run():
-                step()
-        self._mark_as_completed()
+        result = self.command(self)
+        return result
+
+
+def step(func):
+    return DecoratorStep(func.func_name, func)
+
+
+class MetaStage(type):
+
+    def __init__(cls, name, bases, attrs):
+        steps = []
+        for n, step in attrs.items():
+            if isinstance(step, Step):
+                step.name = n
+                step.__stage__ = cls
+                steps.append(step)
+        cls.steps = sorted(steps, key=attrgetter('id'))
+        super(MetaStage, cls).__init__(name, bases, attrs)
+
+
+class Stage(object):
+
+    __metaclass__ = MetaStage
+
+    __jail__ = None
+
+    def __init__(self, name=None):
+        self.name = name
+
+    def __call__(self):
+        for step in self.steps:
+            step()
 
     @property
     def _snapshot_name(self):
