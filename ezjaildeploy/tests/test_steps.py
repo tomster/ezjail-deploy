@@ -42,7 +42,7 @@ class TakeTrip(Stage):
 
 def test_steps_assembly():
     stage = DummyStage()
-    assert [step.name for step in stage.steps] == ['foo', 'mike', 'bob']
+    assert stage.steps.keys() == ['foo', 'mike', 'bob']
 
 
 def test_steps_execution():
@@ -50,5 +50,6 @@ def test_steps_execution():
     stage()
 
 
-def test_stage_assembly():
-
+def test_steps_access():
+    stage = TakeTrip()
+    assert stage.steps['pack_bags'].kwargs['toothbrush']

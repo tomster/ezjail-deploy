@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from operator import attrgetter
 
 
@@ -55,7 +56,7 @@ class MetaStage(type):
                 step.name = n
                 step.__stage__ = cls
                 steps.append(step)
-        cls.steps = sorted(steps, key=attrgetter('id'))
+        cls.steps = OrderedDict((step.name, step) for step in sorted(steps, key=attrgetter('id')))
         super(MetaStage, cls).__init__(name, bases, attrs)
 
 
@@ -69,7 +70,7 @@ class Stage(object):
         self.name = name
 
     def __call__(self):
-        for step in self.steps:
+        for step in self.steps.itervalues():
             step()
 
     @property
