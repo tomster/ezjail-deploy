@@ -161,6 +161,7 @@ class JailSystem(object):
         else:
             host_factory = JailHost
         self.host = host_factory(**host_config)
+        self.host.config = config
         self.jails = OrderedDict()
         for jail_name, jail_config in config.iteritems():
             if jail_name.startswith('_'):
