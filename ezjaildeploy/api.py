@@ -168,7 +168,10 @@ class JailSystem(object):
                 continue
             if 'blueprint' not in jail_config and _blueprints is not None:
                 classname = classname_from_key(jail_name.title())
-                jail_factory = getattr(_blueprints, classname)
+                try:
+                    jail_factory = getattr(_blueprints, classname)
+                except AttributeError:
+                    print "WARNING: could not find blueprint for %s" % classname
             elif 'blueprint' not in jail_config:
                 continue
             else:
